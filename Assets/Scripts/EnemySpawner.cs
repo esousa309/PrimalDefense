@@ -1,44 +1,121 @@
+using System.Collections;
+using System.Reflection;
 using UnityEngine;
+using PrimalDefense.Enemies;
 
-public class EnemySpawner : MonoBehaviour
+namespace PrimalDefense.Spawners
 {
-    [Header("References")]
-    // This is the blueprint of the enemy we want to spawn.
-    public GameObject enemyPrefab; 
-    
-    // This is the path the enemy should follow in this level.
-    public Transform[] path;
-
-    [Header("Spawner Settings")]
-    public float spawnDelay = 2f; // Time in seconds between each spawn.
-
-    private float spawnCountdown = 0f;
-
-    // Update is called once per frame
-    void Update()
+    /// <summary>
+    /// Spawns enemies along a Transform[] path. Compatible with:
+    /// - Legacy EnemyMovement without Init (sets its 'path' field if it exists)
+    /// - EnemyMovement with Init(Transform[]) (invokes it)
+    /// - Our EnemyPathFollower (adds and initializes if no compatible mover is present)
+    /// </summary>
+    public class EnemySpawner : MonoBehaviour
     {
-        // If the countdown has reached zero...
-        if (spawnCountdown <= 0f)
+        [Header("Setup")]
+        public GameObject enemyPrefab;   // assign your enemy prefab
+        public Transform[] path;         // assign Waypoint_0..N
+
+        [Header("Timing")]
+        [Min(0f)] public float spawnDelay = 2f; // interval between spawns
+        [Min(1)]  public int count = 5;         // how many to spawn
+
+        private Coroutine routine;
+
+        private void OnEnable()
         {
-            // ...spawn an enemy!
-            SpawnEnemy();
-            // And reset the countdown.
-            spawnCountdown = spawnDelay;
+            routine = StartCoroutine(SpawnRoutine());
         }
 
-        // Count down the timer.
-        spawnCountdown -= Time.deltaTime;
-    }
+        private void OnDisable()
+        {
+            if (routine != null) StopCoroutine(routine);
+            routine = null;
+        }
 
-    void SpawnEnemy()
-    {
-        // Create a new enemy from our blueprint at the very start of the path.
-        GameObject enemyInstance = Instantiate(enemyPrefab, path[0].position, Quaternion.identity);
+        private IEnumerator SpawnRoutine()
+        {
+            if (enemyPrefab == null)
+            {
+                Debug.LogWarning("[EnemySpawner] enemyPrefab not assigned.");
+                yield break;
+            }
+            if (path == null || path.Length == 0)
+            {
+                Debug.LogWarning("[EnemySpawner] path is empty.");
+                yield break;
+            }
 
-        // Get the EnemyMovement script from the new enemy we just created.
-        EnemyMovement movementScript = enemyInstance.GetComponent<EnemyMovement>();
+            for (int i = 0; i < count; i++)
+            {
+                GameObject go = Instantiate(enemyPrefab);
 
-        // THIS IS THE FIX: Tell the new enemy's movement script where the path is.
-        movementScript.path = path;
+                // Ensure core component
+                if (go.GetComponent<Enemy>() == null) go.AddComponent<Enemy>();
+
+                // Try to find a legacy component by name without compile-time dependency
+                Component legacy = go.GetComponent("EnemyMovement");
+                bool initialized = false;
+
+                if (legacy != null)
+                {
+                    // Prefer a method 'Init(Transform[])' if available
+                    MethodInfo init = legacy.GetType().GetMethod(
+                        "Init",
+                        BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+                        null,
+                        new[] { typeof(Transform[]) },
+                        null
+                    );
+
+                    if (init != null)
+                    {
+                        init.Invoke(legacy, new object[] { path });
+                        initialized = true;
+                    }
+                    else
+                    {
+                        // Fallback: set a field named 'path'
+                        FieldInfo pathField = legacy.GetType().GetField(
+                            "path",
+                            BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
+                        );
+                        if (pathField != null)
+                        {
+                            pathField.SetValue(legacy, path);
+                            initialized = true;
+                        }
+                    }
+                }
+
+                if (!initialized)
+                {
+                    // Use our guaranteed mover
+                    var follower = go.GetComponent<EnemyPathFollower>();
+                    if (follower == null) follower = go.AddComponent<EnemyPathFollower>();
+                    follower.Init(path);
+                }
+
+                if (spawnDelay > 0f && i < count - 1)
+                    yield return new WaitForSeconds(spawnDelay);
+            }
+        }
+
+        private void OnDrawGizmos()
+        {
+            if (path == null || path.Length == 0) return;
+
+            for (int i = 0; i < path.Length; i++)
+            {
+                var t = path[i];
+                if (t == null) continue;
+
+                Gizmos.DrawSphere(t.position, 0.2f);
+
+                if (i < path.Length - 1 && path[i + 1] != null)
+                    Gizmos.DrawLine(t.position, path[i + 1].position);
+            }
+        }
     }
 }

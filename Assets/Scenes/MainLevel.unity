@@ -158,6 +158,7 @@ MonoBehaviour:
   - {fileID: 2143801047}
   - {fileID: 549866933}
   spawnDelay: 2
+  count: 5
 --- !u!4 &28300091
 Transform:
   m_ObjectHideFlags: 0
@@ -1184,9 +1185,39 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2f0b9ce03d4155a46a7dd437a68fc8b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  waves: []
+  waves:
+  - enemyPrefab: {fileID: 0}
+    count: 0
+    rate: 0
+  - enemyPrefab: {fileID: 0}
+    count: 0
+    rate: 0
+  - enemyPrefab: {fileID: 0}
+    count: 0
+    rate: 0
+  - enemyPrefab: {fileID: 0}
+    count: 0
+    rate: 0
+  - enemyPrefab: {fileID: 0}
+    count: 0
+    rate: 0
+  - enemyPrefab: {fileID: 0}
+    count: 0
+    rate: 0
+  - enemyPrefab: {fileID: 0}
+    count: 0
+    rate: 0
+  - enemyPrefab: {fileID: 0}
+    count: 0
+    rate: 0
+  - enemyPrefab: {fileID: 0}
+    count: 0
+    rate: 0
+  - enemyPrefab: {fileID: 0}
+    count: 0
+    rate: 0
   spawnPoint: {fileID: 0}
-  timeBetweenWaves: 5
+  timeBetweenWaves: 1
   waveCountdownText: {fileID: 0}
 --- !u!1 &1078831277
 GameObject:
