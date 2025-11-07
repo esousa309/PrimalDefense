@@ -4,7 +4,6 @@ using UnityEngine.EventSystems;
 public class BuildManager : MonoBehaviour
 {
     public static BuildManager instance;
-
     private GameObject selectedTowerPrefab;
 
     void Awake()
@@ -24,14 +23,10 @@ public class BuildManager : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
-            // --- THIS IS THE FINAL FIX ---
-            // First, check if the mouse is currently over a UI element (like our buttons).
             if (EventSystem.current.IsPointerOverGameObject())
             {
-                // If it is, do nothing. Don't let the click pass through to the game world.
                 return;
             }
-            // --- END OF FIX ---
 
             if (selectedTowerPrefab == null)
             {
