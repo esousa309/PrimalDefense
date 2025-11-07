@@ -1025,6 +1025,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 989919416}
+  - component: {fileID: 989919417}
   m_Layer: 0
   m_Name: _WaveSpawner
   m_TagString: Untagged
@@ -1047,6 +1048,22 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &989919417
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 989919415}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f0b9ce03d4155a46a7dd437a68fc8b5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  waves: []
+  spawnPoint: {fileID: 0}
+  timeBetweenWaves: 5
+  waveCountdownText: {fileID: 0}
 --- !u!1 &1034505814
 GameObject:
   m_ObjectHideFlags: 0
@@ -1595,6 +1612,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2734fb66f51b8e2499d11e648f5161f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  standardTurretPrefab: {fileID: 0}
+  anotherTurretPrefab: {fileID: 0}
 --- !u!1 &1836091351
 GameObject:
   m_ObjectHideFlags: 0
