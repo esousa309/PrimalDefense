@@ -1,11 +1,11 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class BuildTile : MonoBehaviour
+public class Node : MonoBehaviour
 {
     public Color hoverColor;
     public Vector3 positionOffset;
-    
+
     [HideInInspector]
     public GameObject turret;
 
@@ -18,7 +18,6 @@ public class BuildTile : MonoBehaviour
     {
         rend = GetComponent<Renderer>();
         startColor = rend.material.color;
-
         buildManager = BuildManager.instance;
     }
 
@@ -29,6 +28,9 @@ public class BuildTile : MonoBehaviour
 
     void OnMouseDown()
     {
+        if (EventSystem.current.IsPointerOverGameObject())
+            return;
+
         if (turret != null)
         {
             Debug.Log("Can't build there! - TODO: Display on screen.");
