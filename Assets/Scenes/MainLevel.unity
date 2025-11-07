@@ -255,7 +255,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 169737180}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1917354178}
+        m_TargetAssemblyTypeName: Shop, Assembly-CSharp
+        m_MethodName: SelectAnotherTurret
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &169737180
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1693,7 +1705,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1836091354}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1917354178}
+        m_TargetAssemblyTypeName: Shop, Assembly-CSharp
+        m_MethodName: SelectStandardTurret
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1836091354
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1742,6 +1766,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1917354177}
   - component: {fileID: 1917354176}
+  - component: {fileID: 1917354178}
   m_Layer: 0
   m_Name: Game Manager
   m_TagString: Untagged
@@ -1778,6 +1803,24 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1917354178
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1917354175}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bc7e180494bfd446b7e9d6eea8bd40f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  standardTurret:
+    prefab: {fileID: 2055438629876301899, guid: 23244ec0378a5804ab578afd11a93c2e, type: 3}
+    cost: 100
+  anotherTurret:
+    prefab: {fileID: 1587486433438083178, guid: 4edf3c22e40892b41afc223dcfbe3681, type: 3}
+    cost: 150
 --- !u!1 &2130051691
 GameObject:
   m_ObjectHideFlags: 0
