@@ -2,8 +2,6 @@ using UnityEngine;
 
 public class BuildManager : MonoBehaviour
 {
-    // We no longer need public references here, we will pass them in from the button.
-    
     // We create a private variable to hold the tower we want to build.
     private GameObject towerToBuild;
 
@@ -12,6 +10,7 @@ public class BuildManager : MonoBehaviour
     public void SelectTowerToBuild(GameObject tower)
     {
         towerToBuild = tower;
+        Debug.Log("Tower selected: " + tower.name); // Added a log to see if this works
     }
     
     // This is a new public function that the BuildTile will call.
@@ -39,26 +38,5 @@ public class BuildManager : MonoBehaviour
         {
             Debug.Log("Not enough currency!");
         }
-    }
-}
-csharp
-using UnityEngine;
-
-public class BuildTile : MonoBehaviour
-{
-    // A private reference to the BuildManager.
-    private BuildManager buildManager;
-
-    void Start()
-    {
-        // Find the BuildManager in the scene when the game starts.
-        buildManager = FindObjectOfType<BuildManager>();
-    }
-
-    // This is a special Unity function that is called when a mouse clicks on a 3D object with a collider.
-    void OnMouseDown()
-    {
-        // When this tile is clicked, tell the BuildManager to build a tower on our position.
-        buildManager.BuildTowerOnTile(transform);
     }
 }
