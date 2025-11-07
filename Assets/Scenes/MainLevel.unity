@@ -1621,8 +1621,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2734fb66f51b8e2499d11e648f5161f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  standardTurretPrefab: {fileID: 0}
-  anotherTurretPrefab: {fileID: 0}
 --- !u!1 &1836091351
 GameObject:
   m_ObjectHideFlags: 0
@@ -1786,8 +1784,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d2600e66c6dd67e418142f28e81ae074, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CurrencyText: {fileID: 0}
-  StartingCurrency: 0
+  CurrencyText: {fileID: 404515766}
+  StartingCurrency: 400
+  currentCurrency: 0
 --- !u!4 &1917354177
 Transform:
   m_ObjectHideFlags: 0

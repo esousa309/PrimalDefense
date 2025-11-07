@@ -1,9 +1,5 @@
 using UnityEngine;
 
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
-
 public class BuildManager : MonoBehaviour
 {
     public static BuildManager instance;
@@ -18,27 +14,24 @@ public class BuildManager : MonoBehaviour
         instance = this;
     }
 
-    public GameObject standardTurretPrefab;
-    public GameObject anotherTurretPrefab;
-
     private TurretBlueprint turretToBuild;
 
     public bool CanBuild { get { return turretToBuild != null; } }
 
     public void BuildTurretOn(Node node)
     {
-        if (PlayerStats.Money < turretToBuild.cost)
+        if (GameManager.instance.currentCurrency < turretToBuild.cost)
         {
             Debug.Log("Not enough money to build that!");
             return;
         }
 
-        PlayerStats.Money -= turretToBuild.cost;
+        GameManager.instance.SpendCurrency(turretToBuild.cost);
 
         GameObject turret = (GameObject)Instantiate(turretToBuild.prefab, node.GetBuildPosition(), Quaternion.identity);
         node.turret = turret;
 
-        Debug.Log("Turret build! Money left: " + PlayerStats.Money);
+        Debug.Log("Turret built!");
     }
 
     public void SelectTurretToBuild(TurretBlueprint turret)
@@ -46,17 +39,3 @@ public class BuildManager : MonoBehaviour
         turretToBuild = turret;
     }
 }
-
-#if UNITY_EDITOR
-namespace Battlehub.RTSL
-{
-    [CustomEditor(typeof(BuildManager))]
-    public class BuildManagerEditor : Editor
-    {
-        public override void OnInspectorGUI()
-        {
-            base.OnInspectorGUI();
-        }
-    }
-}
-#endif
