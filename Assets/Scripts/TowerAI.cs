@@ -3,76 +3,88 @@ using UnityEngine;
 public class TowerAI : MonoBehaviour
 {
     [Header("Tower Settings")]
-    // The part of the tower that will rotate to face the enemy.
     public Transform turret;
-    
-    // The detection range of the tower. We can see this in the Scene view.
     public float range = 10f;
 
-    // A private variable to store the enemy we are currently targeting.
-    private Transform currentTarget;
+    [Header("Firing Settings")] // NEW SECTION
+    public float fireRate = 1f; // How many times we shoot per second.
+    public GameObject projectilePrefab; // The blueprint for our projectile.
+    public Transform firePoint; // The spot where projectiles will spawn.
 
-    // This is a special Unity function that draws gizmos in the Scene view.
-    // It helps us visualize the tower's range without needing to play the game.
+    private Transform currentTarget;
+    private float fireCountdown = 0f; // A timer to control our firing speed.
+
     void OnDrawGizmosSelected()
     {
-        Gizmos.color = Color.red; // Set the color of our gizmo to red.
-        Gizmos.DrawWireSphere(transform.position, range); // Draw a wireframe sphere around the tower.
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, range);
     }
 
-    // Update is called every single frame.
     void Update()
     {
-        // If we don't have a target, try to find one.
+        // We moved the target finding logic to its own function to keep Update() clean.
+        UpdateTarget();
+
+        // If we don't have a target, do nothing.
         if (currentTarget == null)
+            return;
+
+        // If we have a target, rotate our turret to look at it.
+        turret.LookAt(currentTarget);
+
+        // --- FIRING LOGIC ---
+        // If our countdown timer has reached zero...
+        if (fireCountdown <= 0f)
         {
-            FindTarget();
+            // ...shoot a projectile!
+            Shoot();
+            // And reset the countdown timer based on our fire rate.
+            fireCountdown = 1f / fireRate;
         }
-        else // If we DO have a target...
-        {
-            // ...check if it's still in range.
-            if (Vector3.Distance(transform.position, currentTarget.position) > range)
-            {
-                // If the target has moved out of range, lose focus and set it to null.
-                currentTarget = null;
-            }
-            else
-            {
-                // If the target is still valid and in range, rotate our turret to look at it.
-                turret.LookAt(currentTarget);
-            }
-        }
+
+        // Count down the timer every frame.
+        fireCountdown -= Time.deltaTime;
     }
 
-    // This is our own custom function to find the closest enemy.
-    void FindTarget()
+    // This is a new function to handle the shooting itself.
+    void Shoot()
     {
-        // Find all game objects in the scene that have the "Enemy" tag.
-        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+        // Instantiate means "create a new instance of an object from a prefab".
+        GameObject projectileGO = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
         
-        float closestDistance = Mathf.Infinity; // Start with an infinitely large distance.
-        GameObject closestEnemy = null; // We haven't found a closest enemy yet.
+        // This is a temporary script to make the projectile move. We'll improve this later.
+        // It gets the Rigidbody component of the new projectile and tells it to move forward.
+        Rigidbody rb = projectileGO.GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.velocity = firePoint.forward * 20f; // The "20f" is the projectile's speed.
+        }
+    }
+    
+    // We renamed FindTarget to UpdateTarget for clarity. The logic is the same.
+    void UpdateTarget()
+    {
+        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+        float closestDistance = Mathf.Infinity;
+        GameObject closestEnemy = null;
 
-        // Loop through every enemy we found.
         foreach (GameObject enemy in enemies)
         {
-            // Calculate the distance from our tower to this specific enemy.
             float distanceToEnemy = Vector3.Distance(transform.position, enemy.transform.position);
-
-            // If this enemy is closer than the last one we checked...
             if (distanceToEnemy < closestDistance)
             {
-                // ...update our variables to remember this enemy as the new "closest".
                 closestDistance = distanceToEnemy;
                 closestEnemy = enemy;
             }
         }
 
-        // After checking all enemies, if we found a closest one AND it's within our range...
         if (closestEnemy != null && closestDistance <= range)
         {
-            // ...set it as our current target!
             currentTarget = closestEnemy.transform;
+        }
+        else
+        {
+            currentTarget = null;
         }
     }
 }
