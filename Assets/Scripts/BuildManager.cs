@@ -2,51 +2,51 @@ using UnityEngine;
 
 public class BuildManager : MonoBehaviour
 {
-    // A public "singleton" instance so our tiles can easily access it.
-    public static BuildManager instance;
+    [Header("Tower Prefabs")]
+    // A public spot for our basic turret blueprint.
+    public GameObject turretPrefab; 
+    // A public spot for our cannon blueprint.
+    public GameObject cannonPrefab; 
 
-    // This will hold the blueprint of the tower the player has selected from the UI.
-    private GameObject selectedTowerPrefab;
+    [Header("Build Location")]
+    // The tile where we will build the tower.
+    public Transform buildTile;
 
-    void Awake()
+    // --- Turret Building Logic ---
+    public void BuildTurret()
     {
-        // Set up the singleton.
-        if (instance == null)
-        {
-            instance = this;
-        }
-    }
+        int cost = 100; // The price of this tower.
 
-    // A public function that our UI buttons will call.
-    // This tells the manager which tower blueprint to get ready.
-    public void SelectTowerToBuild(GameObject towerPrefab)
-    {
-        selectedTowerPrefab = towerPrefab;
-    }
-
-    // This is the function the BuildTile will call.
-    public void BuildTowerOnTile(Transform buildTile)
-    {
-        if (selectedTowerPrefab == null)
-        {
-            Debug.Log("No tower selected!");
-            return; // Exit if we haven't picked a tower from the UI first.
-        }
-
-        // We will add cost checks back in a future step. For now, let's just build.
-        int cost = 100; // A placeholder cost.
-
+        // Check if we have enough money.
         if (GameManager.instance.CurrentCurrency >= cost)
         {
+            // Spend the money.
             GameManager.instance.SpendCurrency(cost);
-            Instantiate(selectedTowerPrefab, buildTile.position, Quaternion.identity);
-            
-            // We now disable the specific tile that was clicked.
+            // Build the tower.
+            Instantiate(turretPrefab, buildTile.position, Quaternion.identity);
+            // Hide the build tile.
             buildTile.gameObject.SetActive(false);
         }
         else
         {
-            Debug.Log("Not enough currency!");
+            Debug.Log("Not enough money for a Turret!");
+        }
+    }
+
+    // --- Cannon Building Logic ---
+    public void BuildCannon()
+    {
+        int cost = 150; // The price of this tower.
+
+        if (GameManager.instance.CurrentCurrency >= cost)
+        {
+            GameManager.instance.SpendCurrency(cost);
+            Instantiate(cannonPrefab, buildTile.position, Quaternion.identity);
+            buildTile.gameObject.SetActive(false);
+        }
+        else
+        {
+            Debug.Log("Not enough money for a Cannon!");
         }
     }
 }
