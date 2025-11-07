@@ -1,19 +1,22 @@
 using UnityEngine;
 using System.Collections;
-using UnityEngine.UI;
+using TMPro;
 
 public class WaveSpawner : MonoBehaviour
 {
     public Wave[] waves;
     public Transform spawnPoint;
     public float timeBetweenWaves = 5f;
-    public Text waveCountdownText;
+    public TextMeshProUGUI waveCountdownText;
 
     private float countdown = 2f;
     private int waveNumber = 0;
 
     void Update()
     {
+        if (waveCountdownText == null)
+            return;
+
         if (countdown <= 0f)
         {
             StartCoroutine(SpawnWave());
@@ -43,6 +46,7 @@ public class WaveSpawner : MonoBehaviour
         }
         else
         {
+            waveCountdownText.text = "";
             Debug.Log("ALL WAVES COMPLETE!");
             this.enabled = false;
         }
