@@ -320,7 +320,7 @@ GameObject:
   - component: {fileID: 336266637}
   - component: {fileID: 336266641}
   m_Layer: 0
-  m_Name: Buildfile (2)
+  m_Name: BuildTile (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1030,7 +1030,7 @@ GameObject:
   - component: {fileID: 1034505815}
   - component: {fileID: 1034505819}
   m_Layer: 0
-  m_Name: Buildfile (1)
+  m_Name: BuildTile (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1179,7 +1179,7 @@ GameObject:
   - component: {fileID: 1316689466}
   - component: {fileID: 1316689470}
   m_Layer: 0
-  m_Name: Buildfile
+  m_Name: BuildTile
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
