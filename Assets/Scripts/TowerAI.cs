@@ -2,9 +2,13 @@ using UnityEngine;
 
 public class TowerAI : MonoBehaviour
 {
+    [Header("References")]
+    // This is the part of the tower that will rotate left and right.
+    public Transform turretRotator; 
+
     [Header("Tower Settings")]
-    public Transform turret;
     public float range = 10f;
+    public float turnSpeed = 10f; // How fast the turret turns.
 
     [Header("Firing Settings")]
     public float fireRate = 1f;
@@ -24,22 +28,17 @@ public class TowerAI : MonoBehaviour
     {
         UpdateTarget();
 
+        // If we don't have a target, do nothing.
         if (currentTarget == null)
             return;
 
-        // --- THIS IS THE REAL FIX ---
-        // Get the direction from us to the enemy.
-        Vector3 directionToEnemy = currentTarget.position - transform.position;
-        
-        // Calculate the rotation we need to look in that direction.
-        Quaternion lookRotation = Quaternion.LookRotation(directionToEnemy);
-        
-        // This is the magic part: We create a new rotation that only uses the
-        // Left-Right part (Y-axis) of the calculated rotation. We ignore the Up-Down.
-        // The "10f" controls how fast the turret turns.
-        Vector3 rotation = Quaternion.Lerp(turret.rotation, lookRotation, Time.deltaTime * 10f).eulerAngles;
-        turret.rotation = Quaternion.Euler(0f, rotation.y, 0f);
-        // --- END OF REAL FIX ---
+        // --- THIS IS THE FINAL FIX ---
+        // We make the TurretRotator look at the enemy. This is the correct way.
+        Vector3 direction = currentTarget.position - turretRotator.position;
+        Quaternion lookRotation = Quaternion.LookRotation(direction);
+        Vector3 rotation = Quaternion.Lerp(turretRotator.rotation, lookRotation, Time.deltaTime * turnSpeed).eulerAngles;
+        turretRotator.rotation = Quaternion.Euler(0f, rotation.y, 0f);
+        // --- END OF FIX ---
 
         if (fireCountdown <= 0f)
         {
