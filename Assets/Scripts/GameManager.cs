@@ -5,49 +5,46 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
 
-    [Header("UI References")]
-    public TextMeshProUGUI currencyText;
-
-    [Header("Game Variables")]
-    public int startingCurrency = 100;
-    
-    // We make this a public "property" so other scripts can read the value
-    // but can't accidentally change it. The "private set" protects it.
-    public int CurrentCurrency { get; private set; }
-
     void Awake()
     {
-        if (instance == null)
+        if (instance != null)
         {
-            instance = this;
+            Debug.LogError("More than one GameManager in scene!");
+            return;
         }
-        else
-        {
-            Destroy(gameObject);
-        }
+        instance = this;
     }
+
+    //UI References
+    public TextMeshProUGUI CurrencyText;
+
+    //Game Variables
+    public int StartingCurrency;
+    private int currentCurrency;
 
     void Start()
     {
-        CurrentCurrency = startingCurrency;
-        UpdateCurrencyUI();
+        currentCurrency = StartingCurrency;
+        UpdateCurrencyText();
     }
 
     public void AddCurrency(int amount)
     {
-        CurrentCurrency += amount;
-        UpdateCurrencyUI();
-    }
-    
-    // NEW FUNCTION! This allows other scripts to spend money.
-    public void SpendCurrency(int amount)
-    {
-        CurrentCurrency -= amount;
-        UpdateCurrencyUI();
+        currentCurrency += amount;
+        UpdateCurrencyText();
     }
 
-    private void UpdateCurrencyUI()
+    public void SpendCurrency(int amount)
     {
-        currencyText.text = "Currency: " + CurrentCurrency.ToString();
+        currentCurrency -= amount;
+        UpdateCurrencyText();
+    }
+
+    void UpdateCurrencyText()
+    {
+        if (CurrencyText != null)
+        {
+            CurrencyText.text = "CURRENCY: " + currentCurrency;
+        }
     }
 }
