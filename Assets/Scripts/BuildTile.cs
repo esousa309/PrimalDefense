@@ -1,75 +1,59 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class BuildTile : MonoBehaviour
 {
+    public Color hoverColor;
+    public Vector3 positionOffset;
+    
+    [HideInInspector]
+    public GameObject turret;
 
-}
-```**Save the file.**
+    private Renderer rend;
+    private Color startColor;
 
-2.  Open your **`BuildManager.cs`** script. Erase everything and replace it with this. This ensures it is calling the correctly named class.
+    BuildManager buildManager;
 
-```csharp
-using UnityEngine;
-using UnityEngine.EventSystems;
-
-public class BuildManager : MonoBehaviour
-{
-    public static BuildManager instance;
-    private GameObject selectedTowerPrefab;
-
-    void Awake()
+    void Start()
     {
-        if (instance == null)
-        {
-            instance = this;
-        }
+        rend = GetComponent<Renderer>();
+        startColor = rend.material.color;
+
+        buildManager = BuildManager.instance;
     }
 
-    public void SelectTowerToBuild(GameObject towerPrefab)
+    public Vector3 GetBuildPosition()
     {
-        selectedTowerPrefab = towerPrefab;
+        return transform.position + positionOffset;
     }
 
-    void Update()
+    void OnMouseDown()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (turret != null)
         {
-            if (EventSystem.current.IsPointerOverGameObject())
-            {
-                return;
-            }
-
-            if (selectedTowerPrefab == null)
-            {
-                return;
-            }
-
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
-
-            if (Physics.Raycast(ray, out hit))
-            {
-                // This is the line that was breaking. It's now looking for the correct "BuildTile" class.
-                BuildTile buildTile = hit.transform.GetComponent<BuildTile>();
-
-                if (buildTile != null)
-                {
-                    int cost = 100;
-
-                    if (GameManager.instance.CurrentCurrency >= cost)
-                    {
-                        GameManager.instance.SpendCurrency(cost);
-                        Instantiate(selectedTowerPrefab, buildTile.transform.position, Quaternion.identity);
-                        buildTile.gameObject.SetActive(false);
-                    }
-                    else
-                    {
-                        Debug.Log("Not enough currency!");
-                    }
-                    
-                    selectedTowerPrefab = null;
-                }
-            }
+            Debug.Log("Can't build there! - TODO: Display on screen.");
+            return;
         }
+
+        if (!buildManager.CanBuild)
+            return;
+
+        buildManager.BuildTurretOn(this);
+    }
+
+    void OnMouseEnter()
+    {
+        if (EventSystem.current.IsPointerOverGameObject())
+            return;
+
+        if (!buildManager.CanBuild)
+            return;
+
+        rend.material.color = hoverColor;
+    }
+
+    void OnMouseExit()
+    {
+        rend.material.color = startColor;
     }
 }
