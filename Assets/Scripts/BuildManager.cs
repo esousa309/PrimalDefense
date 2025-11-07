@@ -1,82 +1,62 @@
 using UnityEngine;
-using UnityEngine.EventSystems;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public class BuildManager : MonoBehaviour
 {
     public static BuildManager instance;
-    private GameObject selectedTowerPrefab;
 
     void Awake()
     {
-        if (instance == null)
+        if (instance != null)
         {
-            instance = this;
+            Debug.LogError("More than one BuildManager in scene!");
+            return;
         }
+        instance = this;
     }
 
-    public void SelectTowerToBuild(GameObject towerPrefab)
-    {
-        selectedTowerPrefab = towerPrefab;
-    }
+    public GameObject standardTurretPrefab;
+    public GameObject anotherTurretPrefab;
 
-    void Update()
+    private TurretBlueprint turretToBuild;
+
+    public bool CanBuild { get { return turretToBuild != null; } }
+
+    public void BuildTurretOn(Node node)
     {
-        if (Input.GetMouseButtonDown(0))
+        if (PlayerStats.Money < turretToBuild.cost)
         {
-            if (EventSystem.current.IsPointerOverGameObject())
-            {
-                return;
-            }
-
-            if (selectedTowerPrefab == null)
-            {
-                return;
-            }
-
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
-
-            if (Physics.Raycast(ray, out hit))
-            {
-                BuildTile buildTile = hit.transform.GetComponent<BuildTile>();
-
-                if (buildTile != null)
-                {
-                    int cost = 100;
-
-                    if (GameManager.instance.CurrentCurrency >= cost)
-                    {
-                        GameManager.instance.SpendCurrency(cost);
-                        Instantiate(selectedTowerPrefab, buildTile.transform.position, Quaternion.identity);
-                        buildTile.gameObject.SetActive(false);
-                    }
-                    else
-                    {
-                        Debug.Log("Not enough currency!");
-                    }
-                    
-                    selectedTowerPrefab = null;
-                }
-            }
+            Debug.Log("Not enough money to build that!");
+            return;
         }
+
+        PlayerStats.Money -= turretToBuild.cost;
+
+        GameObject turret = (GameObject)Instantiate(turretToBuild.prefab, node.GetBuildPosition(), Quaternion.identity);
+        node.turret = turret;
+
+        Debug.Log("Turret build! Money left: " + PlayerStats.Money);
     }
-}```
-**Save the file.**
 
----
-
-### **Step 3: Re-Create the `BuildTile` Script**
-
-1.  Back in Unity, inside your **`Scripts`** folder, right-click and choose **Create > C# Script**.
-2.  Name it **exactly `BuildTile`**.
-3.  Double-click the new, clean file to open it.
-4.  **Erase everything** inside it.
-5.  Copy and paste this final, correct, comment-free code:
-
-```csharp
-using UnityEngine;
-
-public class BuildTile : MonoBehaviour
-{
-
+    public void SelectTurretToBuild(TurretBlueprint turret)
+    {
+        turretToBuild = turret;
+    }
 }
+
+#if UNITY_EDITOR
+namespace Battlehub.RTSL
+{
+    [CustomEditor(typeof(BuildManager))]
+    public class BuildManagerEditor : Editor
+    {
+        public override void OnInspectorGUI()
+        {
+            base.OnInspectorGUI();
+        }
+    }
+}
+#endif
