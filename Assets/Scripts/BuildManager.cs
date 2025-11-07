@@ -2,36 +2,63 @@ using UnityEngine;
 
 public class BuildManager : MonoBehaviour
 {
-    [Header("References")]
-    // This is the blueprint of the tower we want to build.
-    public GameObject towerPrefab;
+    // We no longer need public references here, we will pass them in from the button.
     
-    // This is the spot where we will build the tower.
-    public Transform buildTile;
+    // We create a private variable to hold the tower we want to build.
+    private GameObject towerToBuild;
 
-    [Header("Tower Settings")]
-    public int towerCost = 100;
-
-    // This is the function our UI button will call.
-    public void BuildTower()
+    // This is a new public function that our UI will call.
+    // It tells the BuildManager which tower blueprint to get ready.
+    public void SelectTowerToBuild(GameObject tower)
     {
-        // First, check if the player has enough money.
+        towerToBuild = tower;
+    }
+    
+    // This is a new public function that the BuildTile will call.
+    public void BuildTowerOnTile(Transform buildTile)
+    {
+        // First, check if we have even selected a tower to build.
+        if (towerToBuild == null)
+        {
+            Debug.Log("No tower selected to build!");
+            return; // Exit the function.
+        }
+
+        // We will get the cost from the tower's script in the future. For now, let's hardcode it.
+        int towerCost = 100; // We'll improve this later.
+
         if (GameManager.instance.CurrentCurrency >= towerCost)
         {
-            // If yes, spend the currency.
             GameManager.instance.SpendCurrency(towerCost);
-
-            // Create the new tower from the blueprint at the tile's position.
-            // We don't need to worry about rotation, so we use Quaternion.identity.
-            Instantiate(towerPrefab, buildTile.position, Quaternion.identity);
-
-            // Hide the build tile so we can't build on it again.
+            Instantiate(towerToBuild, buildTile.position, Quaternion.identity);
+            
+            // We disable the build tile by passing it in as an argument.
             buildTile.gameObject.SetActive(false);
         }
         else
         {
-            // If the player doesn't have enough money, print a message to the console.
-            Debug.Log("Not enough currency to build a tower!");
+            Debug.Log("Not enough currency!");
         }
+    }
+}
+csharp
+using UnityEngine;
+
+public class BuildTile : MonoBehaviour
+{
+    // A private reference to the BuildManager.
+    private BuildManager buildManager;
+
+    void Start()
+    {
+        // Find the BuildManager in the scene when the game starts.
+        buildManager = FindObjectOfType<BuildManager>();
+    }
+
+    // This is a special Unity function that is called when a mouse clicks on a 3D object with a collider.
+    void OnMouseDown()
+    {
+        // When this tile is clicked, tell the BuildManager to build a tower on our position.
+        buildManager.BuildTowerOnTile(transform);
     }
 }
