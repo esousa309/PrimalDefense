@@ -13,6 +13,7 @@ public class BuildManager : MonoBehaviour
     public Transform buildTile;
 
     // --- Turret Building Logic ---
+    // This is the function the "Build Turret" button will call.
     public void BuildTurret()
     {
         int cost = 100; // The price of this tower.
@@ -34,6 +35,7 @@ public class BuildManager : MonoBehaviour
     }
 
     // --- Cannon Building Logic ---
+    // This is the function the "Build Cannon" button will call.
     public void BuildCannon()
     {
         int cost = 150; // The price of this tower.
