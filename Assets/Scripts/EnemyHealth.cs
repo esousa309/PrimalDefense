@@ -4,7 +4,7 @@ public class EnemyHealth : MonoBehaviour
 {
     [Header("Health Settings")]
     public float maxHealth = 100f;
-    public int currencyOnDeath = 10; // NEW: How much this enemy is worth.
+    public int currencyOnDeath = 10;
 
     private float currentHealth;
 
@@ -17,6 +17,9 @@ public class EnemyHealth : MonoBehaviour
     {
         currentHealth -= damageAmount;
 
+        // NEW LINE! Let's print the enemy's remaining health.
+        Debug.Log(gameObject.name + " took " + damageAmount + " damage. Health is now: " + currentHealth);
+
         if (currentHealth <= 0)
         {
             Die();
@@ -25,12 +28,7 @@ public class EnemyHealth : MonoBehaviour
 
     private void Die()
     {
-        // THIS IS THE NEW PART:
-        // Before we destroy the enemy, we access the global GameManager instance
-        // and call its AddCurrency function, passing in how much this enemy is worth.
         GameManager.instance.AddCurrency(currencyOnDeath);
-
-        // Then, we destroy the enemy GameObject.
         Destroy(gameObject);
     }
 }

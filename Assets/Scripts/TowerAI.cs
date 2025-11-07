@@ -14,48 +14,48 @@ public class TowerAI : MonoBehaviour
     private Transform currentTarget;
     private float fireCountdown = 0f;
 
-    // This special Unity function draws gizmos in the Scene view to help us see the range.
     void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, range);
     }
 
-    // Update is called every single frame.
     void Update()
     {
-        // First, try to find a target.
         UpdateTarget();
 
-        // If we don't have a target, do nothing else.
         if (currentTarget == null)
             return;
 
-        // If we DO have a target, make our turret look at it.
-        turret.LookAt(currentTarget);
+        // --- THIS IS THE FIX ---
+        // Instead of looking directly at the target, we calculate a "flat" direction.
+        
+        // 1. Get the target's actual position.
+        Vector3 targetPosition = currentTarget.position;
+        
+        // 2. This is the magic line: Force the Y-value of our target position
+        //    to be the same as our turret's Y-value. This "flattens" the aim.
+        targetPosition.y = turret.position.y;
 
-        // This is our firing logic.
-        // If our countdown timer has reached zero (or less)...
+        // 3. Now, make the turret look at this new, flattened position.
+        turret.LookAt(targetPosition);
+        // --- END OF FIX ---
+
+
         if (fireCountdown <= 0f)
         {
-            // ...shoot!
             Shoot();
-            // And reset the timer.
             fireCountdown = 1f / fireRate;
         }
 
-        // Make the timer count down every frame.
         fireCountdown -= Time.deltaTime;
     }
 
-    // This function's only job is to create a new projectile.
     void Shoot()
     {
-        // Create a new projectile from our blueprint, at our fire point's position and rotation.
         Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
     }
     
-    // This function looks for the closest enemy.
     void UpdateTarget()
     {
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
