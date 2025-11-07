@@ -3,12 +3,11 @@ using UnityEngine;
 public class TowerAI : MonoBehaviour
 {
     [Header("References")]
-    // This is the part of the tower that will rotate left and right.
     public Transform turretRotator; 
 
     [Header("Tower Settings")]
     public float range = 10f;
-    public float turnSpeed = 10f; // How fast the turret turns.
+    public float turnSpeed = 10f;
 
     [Header("Firing Settings")]
     public float fireRate = 1f;
@@ -28,17 +27,17 @@ public class TowerAI : MonoBehaviour
     {
         UpdateTarget();
 
-        // If we don't have a target, do nothing.
         if (currentTarget == null)
             return;
 
-        // --- THIS IS THE FINAL FIX ---
-        // We make the TurretRotator look at the enemy. This is the correct way.
+        // --- THE AIMING FIX ---
+        // We will make the rotator look directly at the target. This provides the correct 3D angle.
         Vector3 direction = currentTarget.position - turretRotator.position;
         Quaternion lookRotation = Quaternion.LookRotation(direction);
-        Vector3 rotation = Quaternion.Lerp(turretRotator.rotation, lookRotation, Time.deltaTime * turnSpeed).eulerAngles;
-        turretRotator.rotation = Quaternion.Euler(0f, rotation.y, 0f);
-        // --- END OF FIX ---
+        // We smoothly rotate towards the target. This looks much better.
+        turretRotator.rotation = Quaternion.Lerp(turretRotator.rotation, lookRotation, Time.deltaTime * turnSpeed);
+        // --- END OF AIMING FIX ---
+
 
         if (fireCountdown <= 0f)
         {
@@ -51,7 +50,20 @@ public class TowerAI : MonoBehaviour
 
     void Shoot()
     {
-        Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
+        // Create the projectile from the blueprint.
+        GameObject projectileGO = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
+        
+        // --- THE "SMART PROJECTILE" FIX ---
+        // Get the Projectile script from the object we just created.
+        Projectile projectile = projectileGO.GetComponent<Projectile>();
+
+        // If we successfully found the script...
+        if (projectile != null)
+        {
+            // ...call its Seek function and give it our current target.
+            projectile.Seek(currentTarget);
+        }
+        // --- END OF FIX ---
     }
     
     void UpdateTarget()
