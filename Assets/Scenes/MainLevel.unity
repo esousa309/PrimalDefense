@@ -823,8 +823,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c21e1e9bf7120e045a116b6cb91bdc76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  turret: {fileID: 1109124498}
+  turretRotator: {fileID: 1109124498}
   range: 10
+  turnSpeed: 10
   fireRate: 1
   projectilePrefab: {fileID: 86622248701497544, guid: 90b60f6ca30aaa84ba2e199b6585b89b, type: 3}
   firePoint: {fileID: 909244365}
