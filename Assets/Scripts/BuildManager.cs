@@ -60,4 +60,23 @@ public class BuildManager : MonoBehaviour
             }
         }
     }
+}```
+**Save the file.**
+
+---
+
+### **Step 3: Re-Create the `BuildTile` Script**
+
+1.  Back in Unity, inside your **`Scripts`** folder, right-click and choose **Create > C# Script**.
+2.  Name it **exactly `BuildTile`**.
+3.  Double-click the new, clean file to open it.
+4.  **Erase everything** inside it.
+5.  Copy and paste this final, correct, comment-free code:
+
+```csharp
+using UnityEngine;
+
+public class BuildTile : MonoBehaviour
+{
+
 }
