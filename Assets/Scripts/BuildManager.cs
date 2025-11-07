@@ -1,52 +1,68 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class BuildManager : MonoBehaviour
 {
-    [Header("Tower Prefabs")]
-    // A public spot for our basic turret blueprint.
-    public GameObject turretPrefab; 
-    // A public spot for our cannon blueprint.
-    public GameObject cannonPrefab; 
+    public static BuildManager instance;
 
-    [Header("Build Location")]
-    // The tile where we will build the tower.
-    public Transform buildTile;
+    private GameObject selectedTowerPrefab;
 
-    // --- Turret Building Logic ---
-    public void BuildTurret()
+    void Awake()
     {
-        int cost = 100; // The price of this tower.
-
-        // Check if we have enough money.
-        if (GameManager.instance.CurrentCurrency >= cost)
+        if (instance == null)
         {
-            // Spend the money.
-            GameManager.instance.SpendCurrency(cost);
-            // Build the tower.
-            Instantiate(turretPrefab, buildTile.position, Quaternion.identity);
-            // Hide the build tile.
-            buildTile.gameObject.SetActive(false);
-        }
-        else
-        {
-            Debug.Log("Not enough money for a Turret!");
+            instance = this;
         }
     }
 
-    // --- Cannon Building Logic ---
-    public void BuildCannon()
+    public void SelectTowerToBuild(GameObject towerPrefab)
     {
-        int cost = 150; // The price of this tower.
+        selectedTowerPrefab = towerPrefab;
+    }
 
-        if (GameManager.instance.CurrentCurrency >= cost)
+    void Update()
+    {
+        if (Input.GetMouseButtonDown(0))
         {
-            GameManager.instance.SpendCurrency(cost);
-            Instantiate(cannonPrefab, buildTile.position, Quaternion.identity);
-            buildTile.gameObject.SetActive(false);
-        }
-        else
-        {
-            Debug.Log("Not enough money for a Cannon!");
+            // --- THIS IS THE FINAL FIX ---
+            // First, check if the mouse is currently over a UI element (like our buttons).
+            if (EventSystem.current.IsPointerOverGameObject())
+            {
+                // If it is, do nothing. Don't let the click pass through to the game world.
+                return;
+            }
+            // --- END OF FIX ---
+
+            if (selectedTowerPrefab == null)
+            {
+                return;
+            }
+
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
+
+            if (Physics.Raycast(ray, out hit))
+            {
+                BuildTile buildTile = hit.transform.GetComponent<BuildTile>();
+
+                if (buildTile != null)
+                {
+                    int cost = 100;
+
+                    if (GameManager.instance.CurrentCurrency >= cost)
+                    {
+                        GameManager.instance.SpendCurrency(cost);
+                        Instantiate(selectedTowerPrefab, buildTile.transform.position, Quaternion.identity);
+                        buildTile.gameObject.SetActive(false);
+                    }
+                    else
+                    {
+                        Debug.Log("Not enough currency!");
+                    }
+                    
+                    selectedTowerPrefab = null;
+                }
+            }
         }
     }
 }
