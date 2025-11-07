@@ -158,7 +158,11 @@ MonoBehaviour:
   - {fileID: 2143801047}
   - {fileID: 549866933}
   spawnDelay: 2
-  count: 5
+  countPerWave: 5
+  firstWaveDelay: 0
+  interWaveDelay: 5
+  numberOfWaves: 3
+  loopForever: 0
 --- !u!4 &28300091
 Transform:
   m_ObjectHideFlags: 0

@@ -6,26 +6,33 @@ using PrimalDefense.Enemies;
 namespace PrimalDefense.Spawners
 {
     /// <summary>
-    /// Spawns enemies along a Transform[] path. Compatible with:
-    /// - Legacy EnemyMovement without Init (sets its 'path' field if it exists)
-    /// - EnemyMovement with Init(Transform[]) (invokes it)
-    /// - Our EnemyPathFollower (adds and initializes if no compatible mover is present)
+    /// Spawns enemies along a Transform[] path with support for multiple waves.
+    /// Compatible with:
+    ///  - Legacy EnemyMovement (no Init): sets its 'path' field via reflection if present
+    ///  - EnemyMovement with Init(Transform[]): invokes it if present
+    ///  - Our EnemyPathFollower (added automatically if no compatible mover exists)
     /// </summary>
     public class EnemySpawner : MonoBehaviour
     {
         [Header("Setup")]
-        public GameObject enemyPrefab;   // assign your enemy prefab
-        public Transform[] path;         // assign Waypoint_0..N
+        public GameObject enemyPrefab;        // assign your enemy prefab
+        public Transform[] path;              // Waypoint_0..N, in order
 
-        [Header("Timing")]
-        [Min(0f)] public float spawnDelay = 2f; // interval between spawns
-        [Min(1)]  public int count = 5;         // how many to spawn
+        [Header("Per-Unit Timing")]
+        [Min(0f)] public float spawnDelay = 2f; // time between units within a wave
+
+        [Header("Wave Settings")]
+        [Min(1)]  public int countPerWave = 5;  // enemies per wave
+        [Min(0f)] public float firstWaveDelay = 0f;
+        [Min(0f)] public float interWaveDelay = 5f;
+        [Min(1)]  public int numberOfWaves = 3; // if loopForever is false
+        public bool loopForever = true;         // set false to run a finite number of waves
 
         private Coroutine routine;
 
         private void OnEnable()
         {
-            routine = StartCoroutine(SpawnRoutine());
+            routine = StartCoroutine(Run());
         }
 
         private void OnDisable()
@@ -34,7 +41,7 @@ namespace PrimalDefense.Spawners
             routine = null;
         }
 
-        private IEnumerator SpawnRoutine()
+        private IEnumerator Run()
         {
             if (enemyPrefab == null)
             {
@@ -47,20 +54,43 @@ namespace PrimalDefense.Spawners
                 yield break;
             }
 
-            for (int i = 0; i < count; i++)
+            if (firstWaveDelay > 0f) yield return new WaitForSeconds(firstWaveDelay);
+
+            if (loopForever)
+            {
+                while (true)
+                {
+                    yield return SpawnWave();
+                    if (interWaveDelay > 0f) yield return new WaitForSeconds(interWaveDelay);
+                }
+            }
+            else
+            {
+                for (int wave = 0; wave < numberOfWaves; wave++)
+                {
+                    yield return SpawnWave();
+                    if (wave < numberOfWaves - 1 && interWaveDelay > 0f)
+                        yield return new WaitForSeconds(interWaveDelay);
+                }
+            }
+        }
+
+        private IEnumerator SpawnWave()
+        {
+            for (int i = 0; i < countPerWave; i++)
             {
                 GameObject go = Instantiate(enemyPrefab);
 
-                // Ensure core component
+                // Ensure Enemy exists
                 if (go.GetComponent<Enemy>() == null) go.AddComponent<Enemy>();
 
-                // Try to find a legacy component by name without compile-time dependency
+                // Try to use your existing EnemyMovement if present
                 Component legacy = go.GetComponent("EnemyMovement");
                 bool initialized = false;
 
                 if (legacy != null)
                 {
-                    // Prefer a method 'Init(Transform[])' if available
+                    // Prefer Init(Transform[]) if it exists
                     MethodInfo init = legacy.GetType().GetMethod(
                         "Init",
                         BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
@@ -68,7 +98,6 @@ namespace PrimalDefense.Spawners
                         new[] { typeof(Transform[]) },
                         null
                     );
-
                     if (init != null)
                     {
                         init.Invoke(legacy, new object[] { path });
@@ -76,7 +105,7 @@ namespace PrimalDefense.Spawners
                     }
                     else
                     {
-                        // Fallback: set a field named 'path'
+                        // Otherwise set a field named 'path' if present
                         FieldInfo pathField = legacy.GetType().GetField(
                             "path",
                             BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
@@ -89,15 +118,15 @@ namespace PrimalDefense.Spawners
                     }
                 }
 
+                // If legacy didn’t initialize, fall back to our guaranteed mover
                 if (!initialized)
                 {
-                    // Use our guaranteed mover
                     var follower = go.GetComponent<EnemyPathFollower>();
                     if (follower == null) follower = go.AddComponent<EnemyPathFollower>();
                     follower.Init(path);
                 }
 
-                if (spawnDelay > 0f && i < count - 1)
+                if (spawnDelay > 0f && i < countPerWave - 1)
                     yield return new WaitForSeconds(spawnDelay);
             }
         }
