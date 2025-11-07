@@ -6,62 +6,56 @@ public class TowerAI : MonoBehaviour
     public Transform turret;
     public float range = 10f;
 
-    [Header("Firing Settings")] // NEW SECTION
-    public float fireRate = 1f; // How many times we shoot per second.
-    public GameObject projectilePrefab; // The blueprint for our projectile.
-    public Transform firePoint; // The spot where projectiles will spawn.
+    [Header("Firing Settings")]
+    public float fireRate = 1f;
+    public GameObject projectilePrefab;
+    public Transform firePoint;
 
     private Transform currentTarget;
-    private float fireCountdown = 0f; // A timer to control our firing speed.
+    private float fireCountdown = 0f;
 
+    // This special Unity function draws gizmos in the Scene view to help us see the range.
     void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, range);
     }
 
+    // Update is called every single frame.
     void Update()
     {
-        // We moved the target finding logic to its own function to keep Update() clean.
+        // First, try to find a target.
         UpdateTarget();
 
-        // If we don't have a target, do nothing.
+        // If we don't have a target, do nothing else.
         if (currentTarget == null)
             return;
 
-        // If we have a target, rotate our turret to look at it.
+        // If we DO have a target, make our turret look at it.
         turret.LookAt(currentTarget);
 
-        // --- FIRING LOGIC ---
-        // If our countdown timer has reached zero...
+        // This is our firing logic.
+        // If our countdown timer has reached zero (or less)...
         if (fireCountdown <= 0f)
         {
-            // ...shoot a projectile!
+            // ...shoot!
             Shoot();
-            // And reset the countdown timer based on our fire rate.
+            // And reset the timer.
             fireCountdown = 1f / fireRate;
         }
 
-        // Count down the timer every frame.
+        // Make the timer count down every frame.
         fireCountdown -= Time.deltaTime;
     }
 
-    // This is a new function to handle the shooting itself.
+    // This function's only job is to create a new projectile.
     void Shoot()
     {
-        // Instantiate means "create a new instance of an object from a prefab".
-        GameObject projectileGO = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
-        
-        // This is a temporary script to make the projectile move. We'll improve this later.
-        // It gets the Rigidbody component of the new projectile and tells it to move forward.
-        Rigidbody rb = projectileGO.GetComponent<Rigidbody>();
-        if (rb != null)
-        {
-            rb.velocity = firePoint.forward * 20f; // The "20f" is the projectile's speed.
-        }
+        // Create a new projectile from our blueprint, at our fire point's position and rotation.
+        Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
     }
     
-    // We renamed FindTarget to UpdateTarget for clarity. The logic is the same.
+    // This function looks for the closest enemy.
     void UpdateTarget()
     {
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
