@@ -27,20 +27,19 @@ public class TowerAI : MonoBehaviour
         if (currentTarget == null)
             return;
 
-        // --- THIS IS THE FIX ---
-        // Instead of looking directly at the target, we calculate a "flat" direction.
+        // --- THIS IS THE REAL FIX ---
+        // Get the direction from us to the enemy.
+        Vector3 directionToEnemy = currentTarget.position - transform.position;
         
-        // 1. Get the target's actual position.
-        Vector3 targetPosition = currentTarget.position;
+        // Calculate the rotation we need to look in that direction.
+        Quaternion lookRotation = Quaternion.LookRotation(directionToEnemy);
         
-        // 2. This is the magic line: Force the Y-value of our target position
-        //    to be the same as our turret's Y-value. This "flattens" the aim.
-        targetPosition.y = turret.position.y;
-
-        // 3. Now, make the turret look at this new, flattened position.
-        turret.LookAt(targetPosition);
-        // --- END OF FIX ---
-
+        // This is the magic part: We create a new rotation that only uses the
+        // Left-Right part (Y-axis) of the calculated rotation. We ignore the Up-Down.
+        // The "10f" controls how fast the turret turns.
+        Vector3 rotation = Quaternion.Lerp(turret.rotation, lookRotation, Time.deltaTime * 10f).eulerAngles;
+        turret.rotation = Quaternion.Euler(0f, rotation.y, 0f);
+        // --- END OF REAL FIX ---
 
         if (fireCountdown <= 0f)
         {
